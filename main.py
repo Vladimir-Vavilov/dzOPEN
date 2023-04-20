@@ -1,7 +1,7 @@
 with open('reception.txt') as f:
-    cockbook1 = f.read().splitlines()
+    cockbook1 = f.read()
 cockbook = {}
 for cock in cockbook:
-    key, value = cockbook1.split(': ')
+    key, value = cockbook.split(': ')
     cockbook.update({key: value})
 print(cockbook1)
