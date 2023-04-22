@@ -1,25 +1,46 @@
-with open('reception.txt') as f:
-    cockbook1 = f.read()
-cockbook = {}
-for cock in cockbook:
-    key, value = cockbook.split(': ')
-    cockbook.update({key: value})
-print(cockbook1)
-def get_shop_list_by_dishes(dishes, person_count):
-    ingr_list = dict()
-    for dish_name in dishes:
-        if dish_name in cockbook:
-            for ings in cockbook[dish_name]:
-                meas_quan_list = dict()
-                if ings['ingredient_name'] not in ingr_list:
-                    meas_quan_list['measure'] = ings['measure']
-                    meas_quan_list['quantity'] = ings['quantity'] * person_count
-                    ingr_list[ings['ingredient_name']] = meas_quan_list
-                else:
-                    ingr_list[ings['ingredient_name']]['quantity'] = ingr_list[ings['ingredient_name']]['quantity'] + \
-                                                                     ings['quantity'] * person_count
-        else:
-            print(f'\n"Такого блюда нет в списке!"\n')
-    return ingr_list
+def get_recipes(recipes_file='./reception.txt'):
+    cook_book = {}
+    with open(recipes_file) as receipt_file:
+        while True:
+            dish = receipt_file.readline().rstrip('\n').lower()
+            if not dish:
+                break
+            cook_book[dish] = []
+            n = int(receipt_file.readline().rstrip('\n'))
+            items = [receipt_file.readline().rstrip('\n').rsplit('|') for _ in range(n)]
+            for item in items:
+                cook_book[dish].append({'ingridient_name': item[0].rstrip(),
+                                        'quantity': int(item[1].replace(' ', '')),
+                                        'measure': item[2].replace(' ', '')})
+    return cook_book
 
 
+def get_shop_list_by_dishes(cook_book, dishes, person_count):
+    shop_list = {}
+    for dish in dishes:
+        for ingridient in cook_book[dish]:
+            new_shop_list_item = dict(ingridient)
+
+            new_shop_list_item['quantity'] *= person_count
+            if new_shop_list_item['ingridient_name'] not in shop_list:
+                shop_list[new_shop_list_item['ingridient_name']] = new_shop_list_item
+            else:
+                shop_list[new_shop_list_item['ingridient_name']]['quantity'] += new_shop_list_item['quantity']
+    return shop_list
+
+
+def print_shop_list(shop_list):
+    for shop_list_item in shop_list.values():
+        print('{} {} {}'.format(shop_list_item['ingridient_name'], shop_list_item['quantity'],
+                                shop_list_item['measure']))
+
+
+def create_shop_list(cook_book):
+    person_count = int(input('Введите количество человек: '))
+    dishes = input('Введите блюда в расчете '
+                   'на одного человека (через запятую): ').lower().split(', ')
+    shop_list = get_shop_list_by_dishes(cook_book, dishes, person_count)
+    print_shop_list(shop_list)
+
+cook_book = get_recipes()
+create_shop_list(cook_book)
